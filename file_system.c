@@ -1,7 +1,8 @@
 #include "file_system.h"
 
 int BLOCK_NUMBER = 0;
-
+int offset_no_next; = 1;
+int data_offset_next = 1;
 static struct fuse_operations operations = {
     // .mkdir= mkdir_f,
     .readdir = readdir_f,
