@@ -124,7 +124,7 @@ static int getattr_f( const char *path, struct stat *st )
 	else if(path[0]=='/' && (path[1]=='.' || (path[1]=='a' && path[2]=='u')))
 	{
 		st->st_mode = S_IFDIR | 0777;
-		st->st_nlink = 1;	
+		st->st_nlink = 1;
 	 	st->st_size = 1024;
 	}
 	else
@@ -347,7 +347,8 @@ static int readdir_f(const char *path,void *buf, fuse_fill_dir_t filler, off_t o
 	}
 }
 
-static int write_f(const char *path, const char *buf, size_t size, off_t offset, struct fuse_file_info *f)
+static int write_f(const char *path, const char *buf, size_t size, off_t offset,
+		      struct fuse_file_info *f)
 {
 	printf("------write called- %s--",path);
 	if(!search(path))
@@ -394,7 +395,7 @@ static int truncate_f(const char *path,size_t size)
 	else 
 		l=0;
 	if(size>l)
-	{	
+	{
 		cur->data=realloc(cur->data,sizeof(char)*(size));
 		cur->statit.st_size +=l-(size);
 	}
