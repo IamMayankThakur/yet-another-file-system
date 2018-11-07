@@ -68,7 +68,7 @@ void traverse(node *root, void *buf, fuse_fill_dir_t filler)
 {
     if (root)
     {
-        for (int i = 0; i < N; i++)
+        for (int i = 0; i < root->no_of_children; i++)
 	    {
             if(root->child[i]!=NULL)
             {
