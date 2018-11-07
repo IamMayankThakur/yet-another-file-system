@@ -1,8 +1,5 @@
 #include "file_system.h"
-#include <time.h>
-#include <string.h>
 
-int BLOCK_NUMBER = 0;
 int offset_no_next = 1;
 int data_offset_next = 1;
 static struct fuse_operations operations = {
@@ -50,7 +47,7 @@ node* new_node(char* name)
 	(new->inode).offset_no = offset_no_next++;
 	current = time(NULL);
 	local = (localtime(&current));
-	strcpy((new->inode).last_access_date,asctime(local));
+	// strcpy((new->inode).last_access_date,asctime(local));
 	strcpy((new->inode).modify_date,asctime(local));
 	strcpy((new->inode).creation_date,asctime(local));
 	strcpy((new->inode).name,name);
