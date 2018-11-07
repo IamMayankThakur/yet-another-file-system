@@ -50,7 +50,7 @@ node* new_node(char* name)
 	(new->inode).offset_no = offset_no_next++;
 	current = time(NULL);
 	local = (localtime(&current));
-	strcpy((new->inode).last_access_date,asctime(local));
+	// strcpy((new->inode).last_access_date,asctime(local));
 	strcpy((new->inode).modify_date,asctime(local));
 	strcpy((new->inode).creation_date,asctime(local));
 	strcpy((new->inode).name,name);
@@ -64,5 +64,25 @@ int main(int argc,char *argv[])
     fuse_main( argc, argv, &operations, NULL );
     return 0;
 }
-
+void traverse(node *root, void *buf, fuse_fill_dir_t filler)
+{
+    if (root)
+    {
+        for (int i = 0; i < N; i++)
+	    {
+            if(root->child[i]!=NULL)
+            {
+                filler(buf,root->child[i]->name,NULL,0);
+            }
+            else
+            {
+                break;
+            }
+        }
+    }
+    else
+    {
+        return ;
+    }
+}
 
