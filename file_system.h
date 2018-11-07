@@ -15,18 +15,26 @@
 #define PATH_MAX 128
 #define N 100
 
-struct inode 
+struct inode
 {
-    char * name; //without path 
+    char name[PATH_MAX]; //without path 
     // int size; // in bytes
     // int blocks;
     int offset_no;
     int permissions;
     int is_directory;
     int no_of_links;
-    char * modify_date;
-    char * creation_date;
+    char modify_date[30];
+    char last_access_date[30];
+    char creation_date[30];
 };
+
+
+typedef struct name_inode_map
+{
+   char * name;
+   int offset_no; 
+}name_inode_map;
 
 typedef struct node
 {
@@ -38,13 +46,9 @@ typedef struct node
     struct inode inode;
 }node;
 
-typedef struct name_inode_map
-{
-   char * name;
-   int offset_no; 
-}name_inode_map;
-
+/*
+static int mkdir_f(const char *path,mode_t mode)
 static int readdir_f(const char *path,void *buf, fuse_fill_dir_t filler, off_t offset,struct fuse_file_info *fi);
 void traverse(node *root,void *buf,fuse_fill_dir_t filler);
 int search(const char *s);
-
+*/
