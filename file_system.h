@@ -1,4 +1,4 @@
-#define FUSE_USE_VERSION 26
+#define FUSE_USE_VERSION 31
 #include <fuse.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -15,7 +15,7 @@
 #define PATH_MAX 128
 #define N 100
 
-struct inode 
+typedef struct inode 
 {
     char * name; //without path 
     // int size; // in bytes
@@ -26,7 +26,7 @@ struct inode
     int no_of_links;
     char * modify_date;
     char * creation_date;
-};
+}inode;
 
 typedef struct node
 {
@@ -35,7 +35,7 @@ typedef struct node
     int no_of_children; // No of used children
     char name[PATH_MAX]; // with path
     name_inode_map *child[N];  // An array of pointers for N children
-    struct inode inode;
+    inode inode;
 }node;
 
 typedef struct name_inode_map
