@@ -16,21 +16,30 @@ typedef struct inode
     char * creation_date;
 }inode;
 
+void * deserialize(inode op,size_t size, char * file_name, int offset);
+
 int main()
 {
-    FILE * fp;
-    fp = fopen("foo","wb");
     inode i = {"asdas",1,2,3,4,"inode1","inode1"};
     inode i2 = {"node2",4,5,6,7,"inode2","inode2"};
+    serialize(&i,sizeof(i),"foo");
+    inode j;//* j = malloc(sizeof(inode));
+    deserialize(j,sizeof(inode),"foo",0);
+    printf("%s\n%d\n%d\n%d",j.name,j.is_directory,j.offset_no,j.permissions);
+}
 
-    fwrite(&i,1,sizeof(inode),fp);
-    fwrite(&i2,1,sizeof(inode),fp);
-    fclose(fp);
-    printf("Read");
-    fp = fopen("foo","rb");
-    fseek(fp,sizeof(inode),SEEK_CUR);
-    inode * j = malloc(sizeof(inode));
-    int x = fread(j,1,sizeof(inode),fp);
-    printf("%s\n%d\n%d\n%d",j->name,j->is_directory,j->offset_no,j->permissions);
-    // printf("%s,%d,%p",j,j,j);
+int serialize(void * struct_to_be_serialized,int size, char * file_name)
+{
+	FILE * fp = fopen(file_name,"wb+");
+	fwrite(struct_to_be_serialized,1,size,fp);
+	fclose(fp);
+}
+
+void * deserialize(inode op,size_t size, char * file_name, int offset)
+{
+	FILE * fp = fopen(file_name,"rb");
+	// fseek(fp,size * offset,SEEK_CUR);
+	fread(&op,1,size,fp);
+	fclose(fp);
+    // return &op;
 }
