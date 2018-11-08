@@ -11,6 +11,7 @@
 #include <libgen.h>
 #include <limits.h>
 #include <math.h>
+#include <time.h>
 
 #define PATH_MAX 128
 #define N 100

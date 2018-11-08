@@ -1,8 +1,5 @@
 #include "file_system.h"
-#include <time.h>
-#include <string.h>
 
-int BLOCK_NUMBER = 0;
 int offset_no_next = 1;
 int data_offset_next = 1;
 static struct fuse_operations operations = {
