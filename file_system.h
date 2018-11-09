@@ -40,7 +40,7 @@ typedef struct name_inode_map
 {
    char * name;
    int offset_no; 
-}name_inode_map;
+}name_inode;
 
 typedef struct node
 {
