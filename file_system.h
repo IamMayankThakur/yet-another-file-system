@@ -40,11 +40,11 @@ typedef struct name_inode_map
 {
    char * name;
    int offset_no; 
-}name_inode;
+}name_inode_map;
 
 typedef struct node
 {
-    int offset_no;
+    int no;
     int data_offset;
     int no_of_children; // No of used children
     char name[PATH_MAX]; // with path
