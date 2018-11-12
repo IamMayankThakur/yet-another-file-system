@@ -41,19 +41,6 @@ node *newNode(char *name)
 	temp->data = NULL;
 	return temp;
 }
-// int serialize(void * struct_to_be_serialized,int size, char * file_name)
-// {
-// 	FILE * fp = fopen(file_name,"wb+");
-// 	fwrite(struct_to_be_serialized,1,size,fp);
-// 	fclose(fp);
-// }
-
-// void * deserialize(void * op,int size, char * file_name, int offset)
-// {
-//     FILE * fp = fopen("foo","rb");
-//     fread(op,size,1,fp);
-//     fclose(fp);
-// }
 
 void serialize(node *root, FILE *fp)
 {
@@ -63,10 +50,10 @@ void serialize(node *root, FILE *fp)
 
 	// Else, store current node and recur for its children
 	fprintf(fp, "%s", root->name);
-	fprintf(fp, "%s", "#");
+	fprintf(fp, "%s", "$");
 	if (root->data != NULL)
 		fprintf(fp, "%s", root->data);
-	fprintf(fp, "%s", ">");
+	fprintf(fp, "%s", "%");
 	fwrite(&root->inode, sizeof(inode), 1, fp);
 	for (int i = 0; i < 100 && root->child[i]; i++)
 		serialize(root->child[i], fp);
@@ -76,7 +63,7 @@ void serialize(node *root, FILE *fp)
 	//fprintf(fp,"%s","/");
 }
 
-int deSerialize(node **root, FILE *fp)
+int de_serialize(node **root, FILE *fp)
 {
 	// Read next item from file. If theere are no more items or next
 	// OK COOL
@@ -85,15 +72,13 @@ int deSerialize(node **root, FILE *fp)
 	char *data = calloc(1, sizeof(char));
 	int i = 0;
 	val[i] = fgetc(fp);
-	printf("----val=%c---", val[i]);
 	if (val[i] == EOF)
 		return 1;
 	if (val[i] == ')')
 		return 1;
 	while (val[i])
 	{
-
-		if (val[i] == '#')
+		if (val[i] == '$')
 		{
 			val[i] = '\0';
 			printf("%s\n", val);
@@ -109,10 +94,10 @@ int deSerialize(node **root, FILE *fp)
 	data[i] = fgetc(fp);
 	while (data[i])
 	{
-		if (data[i] == '>')
+		if (data[i] == '%')
 		{
 			data[i] = '\0';
-			printf("whattttt---%s\n", data);
+			printf("%s\n", data);
 			if (root != NULL)
 				(*root)->data = data;
 			break;
@@ -126,7 +111,7 @@ int deSerialize(node **root, FILE *fp)
 	if (*root != NULL)
 	{
 		for (int i = 0; i < 100; i++)
-			if (deSerialize(&((*root)->child[i]), fp))
+			if (de_serialize(&((*root)->child[i]), fp))
 				break;
 	}
 	// Finally return 0 for successful finish
@@ -138,19 +123,12 @@ int main()
 	inode i = {"asdas", 1, 2, 3, 4, "inode1", "inode1"};
 	inode i2 = {"node2", 4, 5, 6, 7, "inode2", "inode2"};
 	FILE *fp = fopen("foo", "r+");
-	// node * root = newNode("root");
-	// root->child[0] = newNode("A");
-	// root->child[1] = newNode("B");
-	node *root;
-	// serialize(root,fp);
-	deSerialize(&root, fp);
+	node *root = newNode("root");
+	root->child[0] = newNode("A");
+	root->child[1] = newNode("B");
+	// serialize(root, fp);
+	// root = NULL;
+	de_serialize(&root, fp);
+	// printf("%s\t", root->name);
 	fclose(fp);
 }
-// serialize(&i,sizeof(i),"foo");
-// inode j;// = malloc(sizeof(inode));
-// deserialize(&j,sizeof(inode),"foo",0);
-// This works but the deserialize function doesnt work.
-// FILE * fp = fopen("foo","rb");
-// fread(&j,sizeof(inode),1,fp);
-// fclose(fp);
-// printf("%s\n%d\n%d\n%d",j.name,j.is_directory,j.offset_no,j.permissions);
