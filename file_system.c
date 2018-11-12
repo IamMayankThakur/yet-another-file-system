@@ -5,7 +5,7 @@ int data_offset_next = 1;
 static struct fuse_operations operations = {
 	// .mkdir= mkdir_f,
 	// .readdir = readdir_f,
-	// .getattr = getattr_f,
+	.getattr = getattr_f,
 	// .rmdir = rmdir_f,
 	// .rename = mv_f,
 	// .open = open_f,
@@ -36,7 +36,7 @@ node *new_node(char *name)
 	time_t current;
 	struct tm *local;
 	node *new = malloc(sizeof(node));
-	new->offset_no = offset_no_next;
+	// new->offset_no = offset_no_next;
 	//new->data_offset = data_offset_next++; //for directory ??
 	new->no_of_children = 0;
 	strcpy(new->name, name); //full path or only name?
@@ -50,7 +50,7 @@ node *new_node(char *name)
 	// strcpy((new->inode).last_access_date,asctime(local));
 	strcpy((new->inode).modify_date, asctime(local));
 	strcpy((new->inode).creation_date, asctime(local));
-	strcpy((new->inode).name, name);
+	// strcpy((new->inode).name, name);
 	return new;
 }
 
@@ -140,7 +140,7 @@ int de_serialize(node **root, FILE *fp)
 			data[i] = '\0';
 			printf("%s\n", data);
 			if (root != NULL)
-				(*root)->data = data;
+				strcpy((*root)->data, data);
 			break;
 		}
 		i += 1;
@@ -153,8 +153,54 @@ int de_serialize(node **root, FILE *fp)
 	{
 		for (int i = 0; i < 100; i++)
 			if (de_serialize(&((*root)->child[i]), fp))
+			{
 				break;
+			}
 	}
 	// Finally return 0 for successful finish
 	return 0;
+}
+
+static int getattr_f(const char *path, struct stat *stbuf)
+{
+	node *n;
+	// int valid = check_path(path, &n);
+	int valid = 1;
+	if (!valid)
+	{
+		return -ENOENT; //No such file or directory
+	}
+	else
+	{
+		// *stbuf = n->data.st;
+		return 0;
+	}
+}
+
+node *newNode(char *name)
+{
+	node *temp = malloc(sizeof(node));
+	strcpy(temp->name, name);
+	for (int i = 0; i < N; i++)
+		temp->child[i] = NULL;
+	temp->inode.no_of_links = 0;
+	/* struct stat *stbuf = &temp->statit;
+    memset(stbuf, 0, sizeof(struct stat));*/
+	strcpy(temp->data, NULL);
+	return temp;
+}
+
+void traverse(node *root, void *buf, fuse_fill_dir_t filler)
+{
+	if (root)
+	{
+		//filler(buf,root->name,NULL,0);
+		for (int i = 0; i < N; i++)
+		{
+			if (root->child[i] != NULL)
+				filler(buf, root->child[i]->name, NULL, 0);
+			else
+				break;
+		}
+	}
 }

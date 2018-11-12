@@ -13,7 +13,7 @@
 #include <math.h>
 #include <time.h>
 
-#define PATH_MAX 128
+#define MAXPATH 128
 #define N 100
 #define BLOCK_SIZE 4096
 #define INODE_SIZE sizeof(inode)
@@ -22,32 +22,22 @@
 
 typedef struct inode
 {
-	char name[PATH_MAX]; //without path
-	// int size; // in bytes
-	// int blocks;
 	int offset_no;
 	int permissions;
-	int is_directory;
 	int no_of_links;
 	char *modify_date;
 	char *creation_date;
 } inode;
 
-typedef struct name_inode_map
-{
-	char *name;
-	int offset_no;
-} name_inode_map;
-
 typedef struct node
 {
 	int no;
-	int data_offset;
-	int no_of_children;		  // No of used children
-	char name[PATH_MAX];	  // with path
-	name_inode_map *child[N]; // An array of pointers for N children
+	int is_directory;
+	int no_of_children;	// No of used children
+	char name[MAXPATH];	// with path
+	struct node *child[N]; // An array of pointers for N children
 	inode inode;
-	char data[BLOCK_SIZE]
+	char data[BLOCK_SIZE];
 } node;
 
 /*
@@ -65,3 +55,5 @@ typedef struct name_inode_map
 // For usage of serialize functions, check the `serialize.c` file in reference
 int de_serialize(node **root, FILE *fp);
 void serialize(node *root, FILE *fp);
+node *newNode(char *name);
+void traverse(node *root, void *buf, fuse_fill_dir_t filler);
