@@ -15,42 +15,40 @@
 
 #define PATH_MAX 128
 #define N 100
-#define NODE_FILE node_file 
-#define INODE_FILE inode_file 
-#define DATA_FILE data_file 
+#define BLOCK_SIZE 4096
 #define INODE_SIZE sizeof(inode)
 #define NODE_SIZE sizeof(node)
-#define OFFSET_SIZE to_be_decided
+#define MARKER ")"
 
-typedef struct inode 
+typedef struct inode
 {
-    char name[PATH_MAX]; //without path 
-    // int size; // in bytes
-    // int blocks;
-    int offset_no;
-    int permissions;
-    int is_directory;
-    int no_of_links;
-    char * modify_date;
-    char * creation_date;
-}inode;
-
+	char name[PATH_MAX]; //without path
+	// int size; // in bytes
+	// int blocks;
+	int offset_no;
+	int permissions;
+	int is_directory;
+	int no_of_links;
+	char *modify_date;
+	char *creation_date;
+} inode;
 
 typedef struct name_inode_map
 {
-   char * name;
-   int offset_no; 
-}name_inode_map;
+	char *name;
+	int offset_no;
+} name_inode_map;
 
 typedef struct node
 {
-    int no;
-    int data_offset;
-    int no_of_children; // No of used children
-    char name[PATH_MAX]; // with path
-    name_inode_map *child[N];  // An array of pointers for N children
-    inode inode;
-}node;
+	int no;
+	int data_offset;
+	int no_of_children;		  // No of used children
+	char name[PATH_MAX];	  // with path
+	name_inode_map *child[N]; // An array of pointers for N children
+	inode inode;
+	char data[BLOCK_SIZE]
+} node;
 
 /*
 static int mkdir_f(const char *path,mode_t mode)
@@ -60,10 +58,10 @@ int search(const char *s);
 */
 typedef struct name_inode_map
 {
-   char * name;
-   int offset_no; 
-}name_inode_map;
+	char *name;
+	int offset_no;
+} name_inode_map;
 
 // For usage of serialize functions, check the `serialize.c` file in reference
-int serialize(void * struct_to_be_serialized,int size, char * file_name); // Returns 1 on success, pass the address of the structure
-int deserialize(void * op_struct, int size, char * file_name, int offset); // Returns 1 on success, allocate memory for op_struct in the calling function
+int de_serialize(node **root, FILE *fp);
+void serialize(node *root, FILE *fp);
