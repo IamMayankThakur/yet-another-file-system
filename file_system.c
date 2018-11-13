@@ -3,7 +3,7 @@
 int offset_no_next = 1;
 int data_offset_next = 1;
 static struct fuse_operations operations = {
-	// .mkdir= mkdir_f,
+	// .mkdir = mkdir_f,
 	// .readdir = readdir_f,
 	.getattr = getattr_f,
 	// .rmdir = rmdir_f,
@@ -58,10 +58,11 @@ int main(int argc, char *argv[])
 {
 	//node* hi = new_node("hi");
 	//printf("%s-%s-",hi->inod.modify_date,hi->inod.name);
+	printf("Starting . . . \n");
 	fuse_main(argc, argv, &operations, NULL);
 	return 0;
 }
-void traverse(node *root, void *buf, fuse_fill_dir_t filler)
+void traverse__(node *root, void *buf, fuse_fill_dir_t filler)
 {
 	if (root)
 	{
@@ -242,4 +243,73 @@ static int mkdir_f(const char *path, mode_t mode)
 	}
 
 	return 0;
+}
+
+int search(const char *s)
+{
+	temp_node_cxt = NULL;
+	count_names = 0;
+	count_compare = 0;
+	char path_prevent[strlen(s)], path_prevent1[strlen(s)];
+	strcpy(path_prevent, s);
+	strcpy(path_prevent1, s);
+	get_names(path_prevent);
+	strcpy(names[count_names], "root");
+	j = count_names;
+	get_node_cxt(root, s);
+	if (strcmp(path_prevent1, "/") == 0)
+		strcpy(path_prevent1, "root");
+	if (strcmp(temp_node_cxt->name, basename(path_prevent1)) != 0)
+		return 0;
+	if (strcmp(temp_node_cxt->name, basename(path_prevent1)) == 0 && count_compare == (j))
+		return 0;
+	return 1;
+}
+
+void get_names(char *s)
+{
+	for (int i = 0; i < 100; i++)
+		names[i][0] = '\0';
+	char *dir = malloc(sizeof(s));
+	int k = 1;
+	strcpy(names[0], basename(s));
+	strcpy(dir, dirname(s));
+	while (strcmp(basename(dir), "/") != 0)
+	{
+		strcpy(names[k++], basename(dir));
+		strcpy(dir, dirname(dir));
+	}
+	int i = 0;
+	while (names[i][0] != '\0')
+	{
+		i++;
+		count_names++;
+	}
+}
+
+void get_node_cxt(node *root1, char *path)
+{
+
+	if (root1)
+	{
+		if (strcmp(root1->name, names[j]) == 0)
+		{
+			count_compare += 1;
+			temp_node_cxt = root1;
+			printf("\ntemp=%s\n", temp_node_cxt->name);
+			if (j > 0)
+			{
+				get_node_cxt(temp_node_cxt, names[--j]);
+			}
+			return;
+		}
+		else
+		{
+			for (int i = 0; i < 100; i++)
+			{
+				if (root1->child[i] != NULL)
+					get_node_cxt(root1->child[i], path);
+			}
+		}
+	}
 }

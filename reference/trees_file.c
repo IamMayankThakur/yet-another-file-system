@@ -563,9 +563,9 @@ static struct fuse_operations operations = {
 // Driver program to test above functions
 int main(int argc, char *argv[])
 {
-	asdasdasda
-		// Let us create an N-ary tree shown in above diagram
-		FILE *fd = fopen("M", "r+");
+
+	// Let us create an N-ary tree shown in above diagram
+	FILE *fd = fopen("M", "r+");
 	if (fd == NULL)
 		perror("open");
 	root = NULL;
