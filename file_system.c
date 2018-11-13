@@ -204,3 +204,43 @@ void traverse(node *root, void *buf, fuse_fill_dir_t filler)
 		}
 	}
 }
+
+static int mkdir_f(const char *path, mode_t mode)
+{
+	printf("--------------------mkdir called-------------------");
+	int found = 1;
+	char path_prevent[strlen(path)];
+	strcpy(path_prevent, path);
+	if (!search(dirname(path_prevent)))
+	{
+		printf("---sahi shak tha--");
+		found = 0;
+		return -ENOENT;
+	}
+	Node *cur = temp_node_cxt;
+	if (found == 1)
+	{
+		printf("----Valid path---");
+		printf("--current is--%s", cur->name);
+		for (int i = 0; i < 100; i++)
+		{
+			if (cur->child[i] == NULL)
+			{
+				cur->child[i] = newNode(basename(path));
+				cur->child[i]->statit.st_mode = S_IFDIR | 0777;
+				cur->child[i]->statit.st_nlink = 2;
+				cur->child[i]->statit.st_size = 0;
+				break;
+			}
+		}
+	}
+	else
+		printf("---invalid path");
+	for (int i = 0; i < 100; i++)
+	{
+		if (cur->child[i] != NULL)
+			printf("--extreme=%s---", cur->child[i]->name);
+	}
+
+	return 0;
+}

@@ -57,3 +57,4 @@ int de_serialize(node **root, FILE *fp);
 void serialize(node *root, FILE *fp);
 node *newNode(char *name);
 void traverse(node *root, void *buf, fuse_fill_dir_t filler);
+static int mkdir_f(const char *path, mode_t mode);
