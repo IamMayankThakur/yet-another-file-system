@@ -27,6 +27,8 @@ typedef struct inode
 	int no_of_links;
 	char *modify_date;
 	char *creation_date;
+	int size;
+	int blocks;
 } inode;
 
 typedef struct node
@@ -61,3 +63,4 @@ static int mkdir_f(const char *path, mode_t mode);
 static int getattr_f(const char *path, struct stat *stbuf);
 int search(const char *s);
 void get_node_cxt(node *root1, char *path);
+static int readdir_f(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi);

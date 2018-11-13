@@ -3,8 +3,8 @@
 int offset_no_next = 1;
 int data_offset_next = 1;
 static struct fuse_operations operations = {
-	// .mkdir = mkdir_f,
-	// .readdir = readdir_f,
+	.mkdir = mkdir_f,
+	.readdir = readdir_f,
 	.getattr = getattr_f,
 	// .rmdir = rmdir_f,
 	// .rename = mv_f,
@@ -28,31 +28,31 @@ initialiseFS()
 	root = new_node();
 }
 */
-node *new_node(char *name)
-{
-	//printf("%d",strlen(name));
-	//permission(?),is_directory, no_of_links to be updated in respective functions.
-	//Should go to parent's node and update 'child'
-	time_t current;
-	struct tm *local;
-	node *new = malloc(sizeof(node));
-	// new->offset_no = offset_no_next;
-	//new->data_offset = data_offset_next++; //for directory ??
-	new->no_of_children = 0;
-	strcpy(new->name, name); //full path or only name?
-	for (int i = 0; i < N; i++)
-	{
-		(new->child)[i] = NULL;
-	}
-	(new->inode).offset_no = offset_no_next++;
-	current = time(NULL);
-	local = (localtime(&current));
-	// strcpy((new->inode).last_access_date,asctime(local));
-	strcpy((new->inode).modify_date, asctime(local));
-	strcpy((new->inode).creation_date, asctime(local));
-	// strcpy((new->inode).name, name);
-	return new;
-}
+// node *new_node(char *name)
+// {
+// 	//printf("%d",strlen(name));
+// 	//permission(?),is_directory, no_of_links to be updated in respective functions.
+// 	//Should go to parent's node and update 'child'
+// 	time_t current;
+// 	struct tm *local;
+// 	node *new = malloc(sizeof(node));
+// 	// new->offset_no = offset_no_next;
+// 	//new->data_offset = data_offset_next++; //for directory ??
+// 	new->no_of_children = 0;
+// 	strcpy(new->name, name); //full path or only name?
+// 	for (int i = 0; i < N; i++)
+// 	{
+// 		(new->child)[i] = NULL;
+// 	}
+// 	(new->inode).offset_no = offset_no_next++;
+// 	current = time(NULL);
+// 	local = (localtime(&current));
+// 	// strcpy((new->inode).last_access_date,asctime(local));
+// 	strcpy((new->inode).modify_date, asctime(local));
+// 	strcpy((new->inode).creation_date, asctime(local));
+// 	// strcpy((new->inode).name, name);
+// 	return new;
+// }
 
 int main(int argc, char *argv[])
 {
@@ -162,20 +162,46 @@ int de_serialize(node **root, FILE *fp)
 	return 0;
 }
 
-static int getattr_f(const char *path, struct stat *stbuf)
+static int getattr_f(const char *path, struct stat *st)
 {
-	node *n;
-	// int valid = check_path(path, &n);
-	int valid = 1;
-	if (!valid)
+	printf("\tAttributes of %s requested\n", path);
+	st->st_uid = getuid();
+	st->st_gid = getgid();
+	st->st_atime = time(NULL);
+	st->st_mtime = time(NULL);
+	if (strcmp(path, "/") == 0)
 	{
-		return -ENOENT; //No such file or directory
+		st->st_mode = S_IFDIR | 0755;
+		st->st_nlink = 2;
+	}
+	else if (path[0] == '/' && (path[1] == '.' || (path[1] == 'a' && path[2] == 'u')))
+	{
+		st->st_mode = S_IFDIR | 0777;
+		st->st_nlink = 1;
+		st->st_size = 1024;
 	}
 	else
 	{
-		// *stbuf = n->data.st;
-		return 0;
+		if (path[0] == '/')
+		{
+			printf("----attributes---");
+			if (!search(path))
+			{
+				printf("------WHAT!!!!-----");
+				return -ENOENT;
+			}
+			else
+			{
+				node *cur = temp_node_cxt;
+				st->st_mode = cur->inode.permissions;
+				st->st_nlink = cur->inode.no_of_links;
+				st->st_size = cur->inode.size;
+				st->st_blocks = cur->inode.blocks;
+			}
+		}
 	}
+
+	return 0;
 }
 
 node *newNode(char *name)
@@ -228,8 +254,8 @@ static int mkdir_f(const char *path, mode_t mode)
 			if (cur->child[i] == NULL)
 			{
 				cur->child[i] = newNode(basename(path));
-				cur->child[i]->inode.permissions = S_IFDIR | 0777;
-				cur->child[i]->inode.no_of_links;
+				// cur->child[i]->inode.permissions = S_IFDIR | 0777;
+				cur->child[i]->inode.no_of_links = 2;
 				break;
 			}
 		}
@@ -311,5 +337,41 @@ void get_node_cxt(node *root1, char *path)
 					get_node_cxt(root1->child[i], path);
 			}
 		}
+	}
+}
+
+static int readdir_f(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi)
+{
+	printf("----%s--readdir--", path);
+	if (strcmp(path, "/") == 0)
+		search(path);
+	else
+	{
+		int found = 1;
+		if (!search(path))
+		{
+			found = 0;
+			return -ENOENT;
+		}
+		if (temp_node_cxt == NULL)
+			printf("--temp_node is null--");
+	}
+
+	node *cur = temp_node_cxt;
+	printf("--child=%s----", cur->name);
+	int i = 0;
+	if (cur == NULL)
+	{
+		printf("how can it be null-----");
+		return 0;
+	}
+	/*else if(!S_ISDIR(cur->statit.st_mode))
+	{
+		printf("----what is happening-----");
+		return -ENOTDIR;
+	}*/
+	else
+	{
+		traverse(cur, buf, filler);
 	}
 }
