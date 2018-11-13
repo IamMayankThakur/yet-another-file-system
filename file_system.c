@@ -217,7 +217,7 @@ static int mkdir_f(const char *path, mode_t mode)
 		found = 0;
 		return -ENOENT;
 	}
-	Node *cur = temp_node_cxt;
+	node *cur = temp_node_cxt;
 	if (found == 1)
 	{
 		printf("----Valid path---");
@@ -227,9 +227,8 @@ static int mkdir_f(const char *path, mode_t mode)
 			if (cur->child[i] == NULL)
 			{
 				cur->child[i] = newNode(basename(path));
-				cur->child[i]->statit.st_mode = S_IFDIR | 0777;
-				cur->child[i]->statit.st_nlink = 2;
-				cur->child[i]->statit.st_size = 0;
+				cur->child[i]->inode.permissions = S_IFDIR | 0777;
+				cur->child[i]->inode.no_of_links;
 				break;
 			}
 		}
