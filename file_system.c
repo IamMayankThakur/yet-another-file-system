@@ -164,7 +164,7 @@ int de_serialize(node **root, FILE *fp)
 
 static int getattr_f(const char *path, struct stat *st)
 {
-	printf("\tAttributes of %s requested\n", path);
+	printf("%s\n", path);
 	st->st_uid = getuid();
 	st->st_gid = getgid();
 	st->st_atime = time(NULL);
@@ -184,10 +184,8 @@ static int getattr_f(const char *path, struct stat *st)
 	{
 		if (path[0] == '/')
 		{
-			printf("----attributes---");
 			if (!search(path))
 			{
-				printf("------WHAT!!!!-----");
 				return -ENOENT;
 			}
 			else
@@ -234,21 +232,18 @@ void traverse(node *root, void *buf, fuse_fill_dir_t filler)
 
 static int mkdir_f(const char *path, mode_t mode)
 {
-	printf("--------------------mkdir called-------------------");
 	int found = 1;
 	char path_prevent[strlen(path)];
 	strcpy(path_prevent, path);
 	if (!search(dirname(path_prevent)))
 	{
-		printf("---sahi shak tha--");
 		found = 0;
 		return -ENOENT;
 	}
 	node *cur = temp_node_cxt;
 	if (found == 1)
 	{
-		printf("----Valid path---");
-		printf("--current is--%s", cur->name);
+		printf("--Parent path--%s", cur->name);
 		for (int i = 0; i < 100; i++)
 		{
 			if (cur->child[i] == NULL)
@@ -261,11 +256,11 @@ static int mkdir_f(const char *path, mode_t mode)
 		}
 	}
 	else
-		printf("---invalid path");
+		printf("invalid path");
 	for (int i = 0; i < 100; i++)
 	{
 		if (cur->child[i] != NULL)
-			printf("--extreme=%s---", cur->child[i]->name);
+			printf("CHILD=%s---", cur->child[i]->name);
 	}
 
 	return 0;
@@ -342,7 +337,7 @@ void get_node_cxt(node *root1, char *path)
 
 static int readdir_f(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi)
 {
-	printf("----%s--readdir--", path);
+	printf("READ %s\n", path);
 	if (strcmp(path, "/") == 0)
 		search(path);
 	else
@@ -354,15 +349,14 @@ static int readdir_f(const char *path, void *buf, fuse_fill_dir_t filler, off_t 
 			return -ENOENT;
 		}
 		if (temp_node_cxt == NULL)
-			printf("--temp_node is null--");
+			printf("temp NULL");
 	}
 
 	node *cur = temp_node_cxt;
-	printf("--child=%s----", cur->name);
+	printf("Child=%s", cur->name);
 	int i = 0;
 	if (cur == NULL)
 	{
-		printf("how can it be null-----");
 		return 0;
 	}
 	/*else if(!S_ISDIR(cur->statit.st_mode))
