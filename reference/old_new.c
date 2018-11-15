@@ -22,8 +22,8 @@ typedef struct inode
 	int offset_no;
 	int permissions;
 	int no_of_links;
-	char *modify_date;
-	char *creation_date;
+	char modify_date[100];
+	char *creation_date[100];
 	int size;
 	int blocks;
 } inode;
@@ -577,7 +577,7 @@ int main(int argc, char *argv[])
 {
 
 	// Let us create an N-ary tree shown in above diagram
-	FILE *fd = fopen("M", "w+");
+	FILE *fd = fopen("M", "a+");
 	if (fd == NULL)
 		perror("open");
 	root = NULL;
