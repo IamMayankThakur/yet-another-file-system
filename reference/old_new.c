@@ -1,4 +1,4 @@
-#define FUSE_USE_VERSION 26
+#define FUSE_USE_VERSION 31
 #include <fuse.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -16,11 +16,23 @@
 #define PATH_MAX_1 100
 #define MARKER ")"
 // A node of N-ary tree
+
+typedef struct inode
+{
+	int offset_no;
+	int permissions;
+	int no_of_links;
+	char *modify_date;
+	char *creation_date;
+	int size;
+	int blocks;
+} inode;
+
 struct Node
 {
 	char name[PATH_MAX_1];
 	struct Node *child[N]; // An array of pointers for N children
-	struct stat statit;
+	inode inode;
 	char *data;
 };
 typedef struct Node Node;
@@ -36,10 +48,10 @@ Node *newNode(char *name)
 	strcpy(temp->name, name);
 	for (int i = 0; i < N; i++)
 		temp->child[i] = NULL;
-	temp->statit.st_nlink = 0;
-	temp->statit.st_size = 0;
+	temp->inode.no_of_links = 0;
+	temp->inode.size = 0;
 	/* struct stat *stbuf = &temp->statit;
-    memset(stbuf, 0, sizeof(struct stat));*/
+    memset(stbuf, 0, sizeof(stsruct stat));*/
 	temp->data = NULL;
 	return temp;
 }
@@ -140,10 +152,10 @@ static int getattr_f(const char *path, struct stat *st)
 			else
 			{
 				Node *cur = temp_node_cxt;
-				st->st_mode = cur->statit.st_mode;
-				st->st_nlink = cur->statit.st_nlink;
-				st->st_size = cur->statit.st_size;
-				st->st_blocks = cur->statit.st_blocks;
+				st->st_mode = cur->inode.permissions;
+				st->st_nlink = cur->inode.no_of_links;
+				st->st_size = cur->inode.size;
+				st->st_blocks = cur->inode.blocks;
 			}
 		}
 	}
@@ -158,7 +170,7 @@ static int chmod_f(const char *path, mode_t mode)
 		return -ENOENT;
 	}
 	Node *cur = temp_node_cxt;
-	cur->statit.st_mode = mode;
+	cur->inode.permissions = mode;
 	return 0;
 }
 
@@ -184,9 +196,9 @@ static int mkdir_f(const char *path, mode_t mode)
 			if (cur->child[i] == NULL)
 			{
 				cur->child[i] = newNode(basename(path));
-				cur->child[i]->statit.st_mode = S_IFDIR | 0777;
-				cur->child[i]->statit.st_nlink = 2;
-				cur->child[i]->statit.st_size = 0;
+				cur->child[i]->inode.permissions = S_IFDIR | 0777;
+				cur->child[i]->inode.no_of_links = 2;
+				cur->child[i]->inode.size = 0;
 				break;
 			}
 		}
@@ -262,10 +274,10 @@ static int mknod_f(const char *path, mode_t mode, dev_t dev)
 		if (cur->child[i] == NULL)
 		{
 			cur->child[i] = newNode(basename(path));
-			cur->child[i]->statit.st_mode = mode;
-			cur->child[i]->statit.st_rdev = dev;
-			cur->child[i]->statit.st_size = 1;
-			cur->child[i]->statit.st_nlink = 1;
+			cur->child[i]->inode.permissions = mode;
+			// cur->child[i]->statit.st_rdev = dev;
+			cur->child[i]->inode.size = 1;
+			cur->child[i]->inode.no_of_links = 1;
 			break;
 		}
 	}
@@ -273,33 +285,33 @@ static int mknod_f(const char *path, mode_t mode, dev_t dev)
 }
 
 // A utility function to create a dummy tree shown in above diagram
-static Node *createDummyTree()
-{
-	Node *root = newNode("root");
-	root->child[0] = newNode("Mayank");
-	root->child[0]->statit.st_mode = S_IFREG | 0777;
-	root->child[0]->statit.st_nlink = 1;
-	root->child[0]->statit.st_size = 0;
-	root->child[0]->statit.st_blocks = 0;
-	//root->child[0]->data=malloc(sizeof(char)*4096);
-	//strcpy(root->child[0]->data,"har har mahadev");
-	root->child[1] = newNode("Hey");
-	root->child[1]->statit.st_mode = S_IFREG | 0777;
-	root->child[1]->statit.st_nlink = 1;
-	root->child[1]->statit.st_size = 0;
-	root->child[1]->statit.st_blocks = 0;
-	root->child[2] = newNode("D");
-	root->child[2]->statit.st_mode = S_IFREG | 0777;
-	root->child[2]->statit.st_nlink = 1;
-	root->child[2]->statit.st_size = 0;
-	root->child[2]->statit.st_blocks = 0;
-	root->child[3] = newNode("E");
-	root->child[3]->statit.st_mode = S_IFREG | 0777;
-	root->child[3]->statit.st_nlink = 1;
-	root->child[3]->statit.st_size = 0;
-	root->child[3]->statit.st_blocks = 0;
-	return root;
-}
+// static Node *createDummyTree()
+// {
+// 	Node *root = newNode("root");
+// 	root->child[0] = newNode("Mayank");
+// 	root->child[0]->statit.st_mode = S_IFREG | 0777;
+// 	root->child[0]->statit.st_nlink = 1;
+// 	root->child[0]->statit.st_size = 0;
+// 	root->child[0]->statit.st_blocks = 0;
+// 	//root->child[0]->data=malloc(sizeof(char)*4096);
+// 	//strcpy(root->child[0]->data,"har har mahadev");
+// 	root->child[1] = newNode("Hey");
+// 	root->child[1]->statit.st_mode = S_IFREG | 0777;
+// 	root->child[1]->statit.st_nlink = 1;
+// 	root->child[1]->statit.st_size = 0;
+// 	root->child[1]->statit.st_blocks = 0;
+// 	root->child[2] = newNode("D");
+// 	root->child[2]->statit.st_mode = S_IFREG | 0777;
+// 	root->child[2]->statit.st_nlink = 1;
+// 	root->child[2]->statit.st_size = 0;
+// 	root->child[2]->statit.st_blocks = 0;
+// 	root->child[3] = newNode("E");
+// 	root->child[3]->statit.st_mode = S_IFREG | 0777;
+// 	root->child[3]->statit.st_nlink = 1;
+// 	root->child[3]->statit.st_size = 0;
+// 	root->child[3]->statit.st_blocks = 0;
+// 	return root;
+// }
 
 static int readdir_f(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi)
 {
@@ -355,11 +367,11 @@ static int write_f(const char *path, const char *buf, size_t size, off_t offset,
 	if ((offset + size) > l)
 	{
 		cur->data = realloc(cur->data, sizeof(char) * (offset + size));
-		cur->statit.st_size = offset + size;
-		cur->statit.st_blocks += (offset + size) / 4096;
+		cur->inode.size = offset + size;
+		cur->inode.blocks += (offset + size) / 4096;
 		if ((offset + size) % 4096 != 0)
-			cur->statit.st_blocks += 1;
-		printf("---size is:%d---", cur->statit.st_size);
+			cur->inode.blocks += 1;
+		printf("---size is:%d---", cur->inode.size);
 		//exit(0);
 	}
 	int k = 0;
@@ -479,7 +491,7 @@ void serialize(Node *root, FILE *fp)
 	if (root->data != NULL)
 		fprintf(fp, "%s", root->data);
 	fprintf(fp, "%s", ">");
-	fwrite(&root->statit, sizeof(struct stat), 1, fp);
+	fwrite(&root->inode, sizeof(struct stat), 1, fp);
 	for (int i = 0; i < 100 && root->child[i]; i++)
 		serialize(root->child[i], fp);
 
@@ -532,7 +544,7 @@ int deSerialize(Node **root, FILE *fp)
 		data = realloc(data, strlen(data) + 1);
 		data[i] = fgetc(fp);
 	}
-	fread(&((*root)->statit), sizeof(struct stat), 1, fp);
+	fread(&((*root)->inode), sizeof(struct stat), 1, fp);
 	// Else create node with this item and recur for children
 	if (*root != NULL)
 	{
@@ -565,7 +577,7 @@ int main(int argc, char *argv[])
 {
 
 	// Let us create an N-ary tree shown in above diagram
-	FILE *fd = fopen("M", "r+");
+	FILE *fd = fopen("M", "w+");
 	if (fd == NULL)
 		perror("open");
 	root = NULL;
