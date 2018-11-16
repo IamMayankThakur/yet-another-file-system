@@ -152,10 +152,8 @@ static int getattr_f(const char *path, struct stat *st)
 	{
 		if (path[0] == '/')
 		{
-			printf("----attributes---");
 			if (!search(path))
 			{
-				printf("------WHAT!!!!-----");
 				return -ENOENT;
 			}
 			else
@@ -168,7 +166,6 @@ static int getattr_f(const char *path, struct stat *st)
 			}
 		}
 	}
-
 	return 0;
 }
 
@@ -191,15 +188,13 @@ static int mkdir_f(const char *path, mode_t mode)
 	strcpy(path_prevent, path);
 	if (!search(dirname(path_prevent)))
 	{
-		printf("---sahi shak tha--");
 		found = 0;
 		return -ENOENT;
 	}
 	Node *cur = temp_node_cxt;
 	if (found == 1)
 	{
-		printf("----Valid path---");
-		printf("--current is--%s", cur->name);
+		printf("--current path is--%s", cur->name);
 		for (int i = 0; i < 100; i++)
 		{
 			if (cur->child[i] == NULL)
@@ -213,11 +208,11 @@ static int mkdir_f(const char *path, mode_t mode)
 		}
 	}
 	else
-		printf("---invalid path");
+		printf("\n Invalid path \b");
 	for (int i = 0; i < 100; i++)
 	{
 		if (cur->child[i] != NULL)
-			printf("--extreme=%s---", cur->child[i]->name);
+			printf("\t--%s---\t", cur->child[i]->name);
 	}
 
 	return 0;
@@ -269,7 +264,6 @@ static int mv_f(const char *path, const char *new)
 
 static int mknod_f(const char *path, mode_t mode, dev_t dev)
 {
-	printf("------mknod called---");
 	//exit(0);
 	char *path_prevent = malloc(sizeof(char) * strlen(path));
 	strcpy(path_prevent, path);
@@ -284,7 +278,6 @@ static int mknod_f(const char *path, mode_t mode, dev_t dev)
 		{
 			cur->child[i] = newNode(basename(path));
 			cur->child[i]->inode.permissions = mode;
-			// cur->child[i]->statit.st_rdev = dev;
 			cur->child[i]->inode.size = 1;
 			cur->child[i]->inode.no_of_links = 1;
 			break;
@@ -293,38 +286,9 @@ static int mknod_f(const char *path, mode_t mode, dev_t dev)
 	return 0;
 }
 
-// A utility function to create a dummy tree shown in above diagram
-// static Node *createDummyTree()
-// {
-// 	Node *root = newNode("root");
-// 	root->child[0] = newNode("Mayank");
-// 	root->child[0]->statit.st_mode = S_IFREG | 0777;
-// 	root->child[0]->statit.st_nlink = 1;
-// 	root->child[0]->statit.st_size = 0;
-// 	root->child[0]->statit.st_blocks = 0;
-// 	//root->child[0]->data=malloc(sizeof(char)*4096);
-// 	//strcpy(root->child[0]->data,"har har mahadev");
-// 	root->child[1] = newNode("Hey");
-// 	root->child[1]->statit.st_mode = S_IFREG | 0777;
-// 	root->child[1]->statit.st_nlink = 1;
-// 	root->child[1]->statit.st_size = 0;
-// 	root->child[1]->statit.st_blocks = 0;
-// 	root->child[2] = newNode("D");
-// 	root->child[2]->statit.st_mode = S_IFREG | 0777;
-// 	root->child[2]->statit.st_nlink = 1;
-// 	root->child[2]->statit.st_size = 0;
-// 	root->child[2]->statit.st_blocks = 0;
-// 	root->child[3] = newNode("E");
-// 	root->child[3]->statit.st_mode = S_IFREG | 0777;
-// 	root->child[3]->statit.st_nlink = 1;
-// 	root->child[3]->statit.st_size = 0;
-// 	root->child[3]->statit.st_blocks = 0;
-// 	return root;
-// }
-
 static int readdir_f(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi)
 {
-	printf("----%s--readdir--", path);
+	printf("\n Readdir for %d = ", path);
 	if (strcmp(path, "/") == 0)
 		search(path);
 	else
@@ -336,15 +300,14 @@ static int readdir_f(const char *path, void *buf, fuse_fill_dir_t filler, off_t 
 			return -ENOENT;
 		}
 		if (temp_node_cxt == NULL)
-			printf("--temp_node is null--");
+			printf("Null temp node");
 	}
 
 	Node *cur = temp_node_cxt;
-	printf("--child=%s----", cur->name);
+	printf("\n--child = %s--\n", cur->name);
 	int i = 0;
 	if (cur == NULL)
 	{
-		printf("how can it be null-----");
 		return 0;
 	}
 	/*else if(!S_ISDIR(cur->statit.st_mode))
@@ -362,7 +325,7 @@ static int readdir_f(const char *path, void *buf, fuse_fill_dir_t filler, off_t 
 static int write_f(const char *path, const char *buf, size_t size, off_t offset,
 				   struct fuse_file_info *f)
 {
-	printf("------write called- %s--", path);
+	printf("\n Write called for %s", path);
 	if (!search(path))
 		return -ENOENT;
 	Node *cur = temp_node_cxt;
@@ -380,7 +343,7 @@ static int write_f(const char *path, const char *buf, size_t size, off_t offset,
 		cur->inode.blocks += (offset + size) / 4096;
 		if ((offset + size) % 4096 != 0)
 			cur->inode.blocks += 1;
-		printf("---size is:%d---", cur->inode.size);
+		printf("\n Size is:%d", cur->inode.size);
 		//exit(0);
 	}
 	int k = 0;
@@ -388,14 +351,14 @@ static int write_f(const char *path, const char *buf, size_t size, off_t offset,
 	{
 		cur->data[i] = buf[k++];
 	}
-	printf("--after write=%s----", cur->data);
+	printf("\n Write complete data = %s----", cur->data);
 	return size;
 }
 
 static int truncate_f(const char *path, size_t size)
 {
-	printf("-----truncate-----");
-	printf("----size is:%lu----", size);
+	printf("\n Truncate calle \n");
+	printf("\n Size is: %lu", size);
 	//exit(0);
 	/*if(!search(path))
 		return -ENOENT;
@@ -421,18 +384,17 @@ static int truncate_f(const char *path, size_t size)
 
 static int open_f(const char *path, struct fuse_file_info *f)
 {
-	printf("----open file called---");
+	printf("\n Open called \n");
 	if (!search(path))
 		return -ENOENT;
-	printf("---flags=%d---", f->flags);
+	printf("\n Flags = %d", f->flags);
 
 	return 0;
 }
 
 static int read_f(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi)
 {
-	printf("----read called-----");
-	printf("----path=%s---", path);
+	printf("\n Read called \n");
 	if (!search(path))
 	{
 		return -ENOENT;
@@ -457,18 +419,16 @@ static int read_f(const char *path, char *buf, size_t size, off_t offset, struct
 			flag = 0;
 		if (flag == 0)
 		{
-			printf("----hey----%s", s);
 			for (int i = offset; i <= l; i++)
 				t[k++] = s[i];
 			printf("t is = %s", t);
 			strcpy(buf, t);
-			printf("--l-off=%d--", l - offset);
+			printf("\nl-offset=%d\n", l - offset);
 			//fflush(buf);
 			return (l - offset);
 		}
 		else
 		{
-			printf("-----what----");
 			for (int i = offset; i <= (offset + size); i++)
 				t[k++] = s[i];
 			strcpy(buf, t);
@@ -517,7 +477,7 @@ int deSerialize(Node **root, FILE *fp)
 	char *data = calloc(1, sizeof(char));
 	int i = 0;
 	val[i] = fgetc(fp);
-	printf("----val=%c---", val[i]);
+	printf("\n Val = %c ", val[i]);
 	if (val[i] == EOF)
 		return 1;
 	if (val[i] == ')')
@@ -544,7 +504,7 @@ int deSerialize(Node **root, FILE *fp)
 		if (data[i] == '>')
 		{
 			data[i] = '\0';
-			printf("whattttt---%s\n", data);
+			printf("%s\n", data);
 			if (root != NULL)
 				(*root)->data = data;
 			break;
@@ -561,7 +521,6 @@ int deSerialize(Node **root, FILE *fp)
 			if (deSerialize(&((*root)->child[i]), fp))
 				break;
 	}
-	printf("---ab kya hua---");
 	// Finally return 0 for successful finish
 	return 0;
 }
@@ -584,8 +543,6 @@ static struct fuse_operations operations = {
 // Driver program to test above functions
 int main(int argc, char *argv[])
 {
-
-	// Let us create an N-ary tree shown in above diagram
 	FILE *fd = fopen("M", "a+");
 	if (fd == NULL)
 		perror("open");
@@ -594,13 +551,8 @@ int main(int argc, char *argv[])
 	fd = freopen("M", "r+", fd);
 	if (root == NULL)
 		root = newNode("root");
-	// Let us open a file and serialize the tree into the file
-	// printf("%s",root->child[0]->name);
-	//exit(0);
 	umask(0);
 	fuse_main(argc, argv, &operations, NULL);
-
-	//printf("--------Jai SHri SHyam-----");
 	serialize(root, fd);
 	return 0;
 }
