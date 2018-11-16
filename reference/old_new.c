@@ -177,12 +177,12 @@ static int chmod_f(const char *path, mode_t mode)
 	}
 	Node *cur = temp_node_cxt;
 	cur->inode.permissions = mode;
-	return 0;
+	return 0
 }
 
 static int mkdir_f(const char *path, mode_t mode)
 {
-	printf("--------------------mkdir called-------------------");
+	printf("\n Mkdir called \n");
 	int found = 1;
 	char path_prevent[strlen(path)];
 	strcpy(path_prevent, path);
@@ -194,7 +194,7 @@ static int mkdir_f(const char *path, mode_t mode)
 	Node *cur = temp_node_cxt;
 	if (found == 1)
 	{
-		printf("--current path is--%s", cur->name);
+		printf("\nCurrent path is %s\n", cur->name);
 		for (int i = 0; i < 100; i++)
 		{
 			if (cur->child[i] == NULL)
@@ -212,7 +212,7 @@ static int mkdir_f(const char *path, mode_t mode)
 	for (int i = 0; i < 100; i++)
 	{
 		if (cur->child[i] != NULL)
-			printf("\t--%s---\t", cur->child[i]->name);
+			printf("\t Child of cur : %s\t", cur->child[i]->name);
 	}
 
 	return 0;
@@ -251,7 +251,7 @@ static int mv_f(const char *path, const char *new)
 {
 	if (!search(path))
 	{
-		printf("-------Invalid path------");
+		printf("\n Invalid Path \n");
 		return -ENOENT;
 	}
 	else
@@ -288,7 +288,7 @@ static int mknod_f(const char *path, mode_t mode, dev_t dev)
 
 static int readdir_f(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi)
 {
-	printf("\n Readdir for %d = ", path);
+	printf("\n Readdir called for %d = ", path);
 	if (strcmp(path, "/") == 0)
 		search(path);
 	else
@@ -304,17 +304,12 @@ static int readdir_f(const char *path, void *buf, fuse_fill_dir_t filler, off_t 
 	}
 
 	Node *cur = temp_node_cxt;
-	printf("\n--child = %s--\n", cur->name);
+	printf("\n Child = %s--\n", cur->name);
 	int i = 0;
 	if (cur == NULL)
 	{
 		return 0;
 	}
-	/*else if(!S_ISDIR(cur->statit.st_mode))
-	{
-		printf("----what is happening-----");
-		return -ENOTDIR;
-	}*/
 	else
 	{
 
@@ -330,7 +325,7 @@ static int write_f(const char *path, const char *buf, size_t size, off_t offset,
 		return -ENOENT;
 	Node *cur = temp_node_cxt;
 	if (offset < 0)
-		return 0;
+		return -1;
 	int l;
 	if (cur->data != NULL)
 		l = strlen(cur->data);
@@ -401,18 +396,17 @@ static int read_f(const char *path, char *buf, size_t size, off_t offset, struct
 	}
 	Node *cur = temp_node_cxt;
 	if (cur->data == NULL)
-		return 0;
+		return -1;
 	//buf=malloc(sizeof(char)*strlen(cur->data));
 	int l = strlen(cur->data);
 	if (offset < 0 || offset > l)
-		return 0;
+		return -1;
 	else
 	{
 		//int l=strlen(cur->data);
 		int flag = 1;
 		char s[l];
 		strcpy(s, cur->data);
-		printf("----after write read=%s----", cur->data);
 		char t[l];
 		int k = 0;
 		if (l < (offset + size))
@@ -460,7 +454,7 @@ void serialize(Node *root, FILE *fp)
 	if (root->data != NULL)
 		fprintf(fp, "%s", root->data);
 	fprintf(fp, "%s", ">");
-	fwrite(&root->inode, sizeof(struct stat), 1, fp);
+	fwrite(&root->inode, sizeof(inode), 1, fp);
 	for (int i = 0; i < 100 && root->child[i]; i++)
 		serialize(root->child[i], fp);
 
