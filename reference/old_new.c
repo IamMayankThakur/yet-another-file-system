@@ -1,3 +1,5 @@
+//gcc -Wall -o opfile_name file_name.c `pkg-config fuse --cflags --libs`
+
 #define FUSE_USE_VERSION 31
 #include <fuse.h>
 #include <stdlib.h>
@@ -36,11 +38,14 @@ struct Node
 	char *data;
 };
 typedef struct Node Node;
+
 Node *root;
 Node *temp_node_cxt;
-char names[100][100];
-int count_names = 0, j = 0;
-int count_compare = 0;
+char path_name[100][100];
+
+int name_count = 0, j = 0;
+int comparison_count = 0;
+
 // A utility function to create a new N-ary tree node
 Node *newNode(char *name)
 {
@@ -55,39 +60,42 @@ Node *newNode(char *name)
 	temp->data = NULL;
 	return temp;
 }
-void get_names(char *s)
+void name_fetch(char *s)
 {
 	for (int i = 0; i < 100; i++)
-		names[i][0] = '\0';
-	char *dir = malloc(sizeof(s));
+		path_name[i][0] = '\0';
+	char *temp_direc = malloc(sizeof(s));
 	int k = 1;
-	strcpy(names[0], basename(s));
-	strcpy(dir, dirname(s));
-	while (strcmp(basename(dir), "/") != 0)
+
+	strcpy(path_name[0], basename(s));
+	strcpy(temp_direc, dirname(s));
+
+	while (strcmp(basename(temp_direc), "/") != 0)
 	{
-		strcpy(names[k++], basename(dir));
-		strcpy(dir, dirname(dir));
+		strcpy(path_name[k++], basename(temp_direc));
+		strcpy(temp_direc, dirname(temp_direc));
 	}
 	int i = 0;
-	while (names[i][0] != '\0')
+	while (path_name[i][0] != '\0')
 	{
 		i++;
-		count_names++;
+		name_count++;
 	}
 }
-void getNodecxt(Node *root1, char *path)
+
+void path_to_node(Node *root_node, char *path)
 {
 
-	if (root1)
+	if (root_node)
 	{
-		if (strcmp(root1->name, names[j]) == 0)
+		if (strcmp(root_node->name, path_name[j]) == 0)
 		{
-			count_compare += 1;
-			temp_node_cxt = root1;
-			printf("\ntemp=%s\n", temp_node_cxt->name);
+			comparison_count += 1;
+			temp_node_cxt = root_node;
+			printf("\nCurrent Context = %s\n", temp_node_cxt->name);
 			if (j > 0)
 			{
-				getNodecxt(temp_node_cxt, names[--j]);
+				path_to_node(temp_node_cxt, path_name[--j]);
 			}
 			return;
 		}
@@ -95,29 +103,30 @@ void getNodecxt(Node *root1, char *path)
 		{
 			for (int i = 0; i < 100; i++)
 			{
-				if (root1->child[i] != NULL)
-					getNodecxt(root1->child[i], path);
+				if (root_node->child[i] != NULL)
+					path_to_node(root_node->child[i], path);
 			}
 		}
 	}
 }
+
 int search(const char *s)
 {
 	temp_node_cxt = NULL;
-	count_names = 0;
-	count_compare = 0;
+	name_count = 0;
+	comparison_count = 0;
 	char path_prevent[strlen(s)], path_prevent1[strlen(s)];
 	strcpy(path_prevent, s);
 	strcpy(path_prevent1, s);
-	get_names(path_prevent);
-	strcpy(names[count_names], "root");
-	j = count_names;
-	getNodecxt(root, s);
+	name_fetch(path_prevent);
+	strcpy(path_name[name_count], "root");
+	j = name_count;
+	path_to_node(root, s);
 	if (strcmp(path_prevent1, "/") == 0)
 		strcpy(path_prevent1, "root");
 	if (strcmp(temp_node_cxt->name, basename(path_prevent1)) != 0)
 		return 0;
-	if (strcmp(temp_node_cxt->name, basename(path_prevent1)) == 0 && count_compare == (j))
+	if (strcmp(temp_node_cxt->name, basename(path_prevent1)) == 0 && comparison_count == (j))
 		return 0;
 	return 1;
 }
