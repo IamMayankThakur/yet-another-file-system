@@ -243,6 +243,9 @@ static int rmdir_f(const char *path)
 	{
 		Node *cur = temp_node_cxt;
 		cur = NULL;
+		printf("Tryna delete this : %s ", path);
+		printf(" Current cxt at : %s", temp_node_cxt->name);
+		remove_node(path);
 	}
 	return 0;
 }
@@ -490,6 +493,26 @@ int deSerialize(Node **root, FILE *fp)
 	}
 	// Finally return 0 for successful finish
 	return 0;
+}
+
+int remove_node(char *path)
+{
+	path_to_node(root, dirname(path));
+	// Node *temp = temp_node_cxt;
+	// printf(" parent path name : %s", temp->name);
+	// int i = 0;
+	// for (i = 0; i < N; i++)
+	// {
+	// 	if (strcmp(basename(path), temp->child[i]->name) == 0)
+	// 	{
+	// 		temp->child[i] = NULL;
+	// 		return 1;
+	// 	}
+	// }
+	free(temp_node_cxt);
+	temp_node_cxt = NULL;
+	printf("DELETED");
+	printf("Now cxt at : %s", temp_node_cxt->name);
 }
 
 static struct fuse_operations operations = {
