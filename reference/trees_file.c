@@ -579,7 +579,6 @@ int main(int argc, char *argv[])
 	umask(0);
 	fuse_main(argc, argv, &operations, NULL);
 
-	//printf("--------Jai SHri SHyam-----");
 	serialize(root, fd);
 	return 0;
 }

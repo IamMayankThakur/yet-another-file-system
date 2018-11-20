@@ -177,7 +177,7 @@ static int chmod_f(const char *path, mode_t mode)
 	}
 	Node *cur = temp_node_cxt;
 	cur->inode.permissions = mode;
-	return 0
+	return 0;
 }
 
 static int mkdir_f(const char *path, mode_t mode)
@@ -288,7 +288,7 @@ static int mknod_f(const char *path, mode_t mode, dev_t dev)
 
 static int readdir_f(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi)
 {
-	printf("\n Readdir called for %d = ", path);
+	printf("\n Readdir called for %s", path);
 	if (strcmp(path, "/") == 0)
 		search(path);
 	else
@@ -348,33 +348,6 @@ static int write_f(const char *path, const char *buf, size_t size, off_t offset,
 	}
 	printf("\n Write complete data = %s----", cur->data);
 	return size;
-}
-
-static int truncate_f(const char *path, size_t size)
-{
-	printf("\n Truncate calle \n");
-	printf("\n Size is: %lu", size);
-	//exit(0);
-	/*if(!search(path))
-		return -ENOENT;
-	Node *cur=temp_node_cxt;
-	int l;
-	if(cur->data!=NULL)
-		l=strlen(cur->data);
-	else 
-		l=0;
-	if(size>l)
-	{
-		cur->data=realloc(cur->data,sizeof(char)*(size));
-		cur->statit.st_size +=l-(size);
-	}
-	else
-	{
-		cur->data=realloc(cur->data,sizeof(char)*(strlen(cur->data)));
-		cur->statit.st_size +=1;
-	}
-	//printf("----after truncate---%s",cur->data);*/
-	return 0;
 }
 
 static int open_f(const char *path, struct fuse_file_info *f)
@@ -507,7 +480,7 @@ int deSerialize(Node **root, FILE *fp)
 		data = realloc(data, strlen(data) + 1);
 		data[i] = fgetc(fp);
 	}
-	fread(&((*root)->inode), sizeof(struct stat), 1, fp);
+	fread(&((*root)->inode), sizeof(inode), 1, fp);
 	// Else create node with this item and recur for children
 	if (*root != NULL)
 	{
@@ -528,7 +501,6 @@ static struct fuse_operations operations = {
 	.open = open_f,
 	.read = read_f,
 	.write = write_f,
-	.truncate = truncate_f,
 	.mknod = mknod_f,
 	.chmod = chmod_f,
 	.unlink = unlink_f,
@@ -537,7 +509,7 @@ static struct fuse_operations operations = {
 // Driver program to test above functions
 int main(int argc, char *argv[])
 {
-	FILE *fd = fopen("M", "a+");
+	FILE *fd = fopen("M", "r+");
 	if (fd == NULL)
 		perror("open");
 	root = NULL;
