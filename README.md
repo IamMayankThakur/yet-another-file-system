@@ -35,9 +35,3 @@ File System Project for UE16CS302.
 * ``git commit -m `commit_message` ``
 * `` git push origin `branch_name` ``
 
-## How it works!!
-* We have 3 files, storing inode, node and data for each file. .
-* inode file stores the inode structre, node file stores the logical view of the tree i.e. the node structure and the data file has the actual data content of the files.
-* There is another structure which stores the mapping of the `offset_no` and `file_name` .
-* `offset_no` is the offset to that particular inode/node record in the respective file for a given file.
-* `data_offset` is the offset to the beginning of the data for a given `offset_no`.
