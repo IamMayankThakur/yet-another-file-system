@@ -139,7 +139,7 @@ static int getattr_f(const char *path, struct stat *st)
 	st->st_mtime = time(NULL);
 	if (strcmp(path, "/") == 0)
 	{
-		st->st_mode = S_IFDIR | 0755;
+		st->st_mode = S_IFDIR | 0777;
 		st->st_nlink = 2;
 	}
 	else if (path[0] == '/' && (path[1] == '.' || (path[1] == 'a' && path[2] == 'u')))
@@ -498,17 +498,17 @@ int deSerialize(Node **root, FILE *fp)
 int remove_node(char *path)
 {
 	path_to_node(root, dirname(path));
-	// Node *temp = temp_node_cxt;
-	// printf(" parent path name : %s", temp->name);
-	// int i = 0;
-	// for (i = 0; i < N; i++)
-	// {
-	// 	if (strcmp(basename(path), temp->child[i]->name) == 0)
-	// 	{
-	// 		temp->child[i] = NULL;
-	// 		return 1;
-	// 	}
-	// }
+	Node *temp = temp_node_cxt;
+	printf(" parent path name : %s", temp->name);
+	int i = 0;
+	for (i = 0; i < N; i++)
+	{
+		if (strcmp(basename(path), temp->child[i]->name) == 0)
+		{
+			temp->child[i] = NULL;
+			return 1;
+		}
+	}
 	free(temp_node_cxt);
 	temp_node_cxt = NULL;
 	printf("DELETED");
